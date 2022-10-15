@@ -178,7 +178,6 @@ def astar_agent(start):
         if choice==END_NODE:
             path = makepath(camefrom, END_NODE, start)
             return True, path[::-1]
-            break
         for neighbor in give_neighbors_agent(choice):
             test = g[choice[0]][choice[1]]+1
             if test<g[neighbor[0]][neighbor[1]]:
@@ -235,7 +234,6 @@ def repeated_astar(start):
 
     return True
     pass
-
 
             
 def SE_PHASE(active):
@@ -346,4 +344,3 @@ def main():
     game_loop()
 
 main()
-
