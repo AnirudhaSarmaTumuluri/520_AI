@@ -14,6 +14,11 @@ display_grid = actual_grid
 agent_grid = [[GREY for _ in range(ROWS)] for x in range(ROWS)]
 agent_grid[-1][-1] = BLUE
 
+g = [[float('inf') for _ in range(ROWS)] for x in range(ROWS)]
+f = [[float('inf') for _ in range(ROWS)] for x in range(ROWS)]
+# g[start[0]][start[1]] = 0
+# f[start[0]][start[1]] = h[start[0]][start[1]]
+
 def calculate_hcost(ROWS, target):
     for i in range(ROWS):
         for j in range(ROWS):
@@ -161,17 +166,18 @@ def astar_agent_backward(start):
     return False, None
 
 
+
 def astar_agent(start):
     camefrom = dict()
     openset = PQ()
     openset.put((h[start[0]][start[1]], start))
     
-    g = [[float('inf') for _ in range(ROWS)] for x in range(ROWS)]
-    f = [[float('inf') for _ in range(ROWS)] for x in range(ROWS)]
+    # g = [[float('inf') for _ in range(ROWS)] for x in range(ROWS)]
+    # f = [[float('inf') for _ in range(ROWS)] for x in range(ROWS)]
 
     g[start[0]][start[1]] = 0
     f[start[0]][start[1]] = h[start[0]][start[1]]
-
+    
     while not openset.empty():
         choice = openset.get()
         choice = choice[1]
@@ -191,6 +197,9 @@ def astar_agent(start):
 def repeated_astar(start):
     Open_path = []
     calculate_hcost(ROWS, END_NODE)
+    
+    g[start[0]][start[1]] = 0
+    f[start[0]][start[1]] = h[start[0]][start[1]]
     current_location = start
     agent_grid[current_location[0]][current_location[1]] = YELLOW
     Open_path.append(start)
