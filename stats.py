@@ -1,3 +1,4 @@
+from asyncore import read
 from msilib import OpenDatabase
 from queue import PriorityQueue as PQ
 import random
@@ -7,12 +8,13 @@ import pygame
 from math import inf
 import time
 from constants import *
-from Origianl_maze_gen import make_maze
-from Generator_maze import createMaze as newmaze
+#from maze_gen_test import make_maze
+#from maze_new_test import newmaze
+successful = []
+unsuccessful = []
 from reader import readFile
-fname = 'attach2\Random_Maze '+str(7)
-actual_grid = readFile(fname)
-display_grid = actual_grid
+
+actual_grid = [[0 for _ in range(ROWS)] for x in range(ROWS)]
 agent_grid = [[GREY for _ in range(ROWS)] for x in range(ROWS)]
 agent_grid[-1][-1] = BLUE
 search = [[0 for _ in range(ROWS)] for x in range(ROWS)]
@@ -37,15 +39,7 @@ def calculate_hcost(ROWS, target):
 
 #draw_lines_GLOBAL()
 
-def draw_colors_GLOBAL():
-    for i in range(ROWS):
-        for j in range(ROWS):
-            pygame.draw.rect(WINDOW, display_grid[i][j], (i*NODE_LENGTH+1, j*NODE_LENGTH+1, NODE_LENGTH, NODE_LENGTH))
-            pygame.draw.rect(WINDOW, agent_grid[i][j], (i*NODE_LENGTH+GRID_LENGTH+NODE_LENGTH+1, j*NODE_LENGTH+1, NODE_LENGTH, NODE_LENGTH))
 
-def update_frame():
-    draw_colors_GLOBAL()
-    pygame.display.update()
 
 def give_neighbors_update(NODE):
     retval = []
@@ -67,39 +61,40 @@ def init_agent_grid():
     agent_grid[END_NODE[0]][END_NODE[1]] = BLUE
     neighbors = give_neighbors_update(START_NODE)
     for neighbor in neighbors:
-        agent_grid[neighbor[0]][neighbor[1]] = display_grid[neighbor[0]][neighbor[1]]
-    update_frame()
+        agent_grid[neighbor[0]][neighbor[1]] = actual_grid[neighbor[0]][neighbor[1]]
+    #update_frame()
 
 def set_start(i,j):
     global START_NODE
-    display_grid[START_NODE[0]][START_NODE[1]] = WHITE #Make old start white
-    display_grid[i][j] = RED #color the new start node
+    actual_grid[START_NODE[0]][START_NODE[1]] = WHITE #Make old start white
+    #display_grid[i][j] = RED #color the new start node
     agent_grid[START_NODE[0]][START_NODE[1]] = GREY
     agent_grid[i][j] = RED
     START_NODE = (i,j)
-    update_frame()
+    #update_frame()
 set_start(START_NODE[0], START_NODE[1])
 
 def set_end(i,j):
     global END_NODE
-    display_grid[END_NODE[0]][END_NODE[1]] = WHITE
-    display_grid[i][j] = BLUE
+    actual_grid[END_NODE[0]][END_NODE[1]] = WHITE
+    #display_grid[i][j] = BLUE
     agent_grid[END_NODE[0]][END_NODE[1]] = GREY
     agent_grid[i][j] = BLUE
     END_NODE = (i,j)
-    update_frame()
+    #update_frame()
+set_start(START_NODE[0], START_NODE[1])
 set_end(END_NODE[0], END_NODE[1])
 init_agent_grid()
 
 def set_blocked(i,j):
     if ((i,j)!=START_NODE) & ((i,j)!=END_NODE):
-        display_grid[i][j] = BLACK
-        update_frame()
+        actual_grid[i][j] = BLACK
+        #update_frame()
 
 def set_unblocked(i,j):
     if ((i,j)!=START_NODE) & ((i,j)!=END_NODE):
-        display_grid[i][j] = WHITE
-        update_frame()
+        actual_grid[i][j] = WHITE
+        #update_frame()
 
 
 
@@ -221,17 +216,17 @@ def repeated_astar(start):
     while current_location!=END_NODE:
         counter+=1
         #getpath from a star
-        #print('---------------------------------')
-        print('CALCULATING PATH FROM:', current_location)
+        ##print('---------------------------------')
+        #print('CALCULATING PATH FROM:', current_location)
         g[start[0]][start[1]] = 0
         search[start[0]][start[1]] = counter
         g[END_NODE[0]][END_NODE[1]] = float('inf')
         search[END_NODE[0]][END_NODE[1]] = counter
         ans, path = astar_agent(current_location, counter)
         #print(path)
-        print('Path found:', ans)
+        #print('Path found:', ans)
         #print(path)
-        #print('----------------------------------')
+        ##print('----------------------------------')
         #follow path until node in path is blocked
         #Assume that the first node in path would be start point and last would be end point
         i = 1
@@ -241,11 +236,11 @@ def repeated_astar(start):
             while agent_grid[next_step[0]][next_step[1]]!=BLACK:
                 steps_taken_without_path_update+=1
                 i+=1
-                print('Currently at:', current_location)
+                #print('Currently at:', current_location)
                 agent_grid[current_location[0]][current_location[1]] = WHITE
-                display_grid[current_location[0]][current_location[1]] = WHITE
+                #display_grid[current_location[0]][current_location[1]] = WHITE
                 current_location = next_step #Move a step
-                display_grid[current_location[0]][current_location[1]] = RED
+                #display_grid[current_location[0]][current_location[1]] = RED
                 #time.sleep(0.2)
                 Open_path.append(current_location)
                 agent_grid[current_location[0]][current_location[1]] = RED
@@ -257,7 +252,7 @@ def repeated_astar(start):
                 for node in updates:
                     if agent_grid[node[0]][node[1]]!=PATH:
                         agent_grid[node[0]][node[1]] = actual_grid[node[0]][node[1]]
-                update_frame()
+                #update_frame()
                 next_step = path[i] #Get ready to take next step
                 #update knowledge
         
@@ -312,8 +307,8 @@ def repeated_astar_ADAPTIVE(start):
     while current_location!=END_NODE:
         counter+=1
         #getpath from a star
-        print('---------------------------------')
-        print('CALCULATING PATH FROM:', current_location)
+        #print('---------------------------------')
+        #print('CALCULATING PATH FROM:', current_location)
         h[start[0]][start[1]] = gGOAL - g[start[0]][start[1]]
         g[start[0]][start[1]] = 0
         search[start[0]][start[1]] = counter
@@ -321,9 +316,9 @@ def repeated_astar_ADAPTIVE(start):
         search[END_NODE[0]][END_NODE[1]] = counter
         ans, path, gGOAL = astar_agent_adaptive(current_location, counter, gGOAL)
         #print(path)
-        print('Path found:', ans)
+        #print('Path found:', ans)
         #print(path)
-        print('----------------------------------')
+        #print('----------------------------------')
         #follow path until node in path is blocked
         #Assume that the first node in path would be start point and last would be end point
         i = 1
@@ -331,11 +326,11 @@ def repeated_astar_ADAPTIVE(start):
             next_step = path[1]
             while agent_grid[next_step[0]][next_step[1]]!=BLACK:
                 i+=1
-                print('Currently at:', current_location)
+                #print('Currently at:', current_location)
                 agent_grid[current_location[0]][current_location[1]] = WHITE
-                display_grid[current_location[0]][current_location[1]] = WHITE
+                #display_grid[current_location[0]][current_location[1]] = WHITE
                 current_location = next_step #Move a step
-                display_grid[current_location[0]][current_location[1]] = RED
+                #display_grid[current_location[0]][current_location[1]] = RED
                 #time.sleep(0.2)
                 agent_grid[current_location[0]][current_location[1]] = RED
                 if current_location==END_NODE:
@@ -345,7 +340,7 @@ def repeated_astar_ADAPTIVE(start):
                 for node in updates:
                     if agent_grid[node[0]][node[1]]!=PATH:
                         agent_grid[node[0]][node[1]] = actual_grid[node[0]][node[1]]
-                update_frame()
+                #update_frame()
                 next_step = path[i] #Get ready to take next step
                 #update knowledge
         
@@ -367,18 +362,18 @@ def repeated_astar_backward(start):
     while current_location!=END_NODE:
         counter+=1
         #getpath from a star
-        #print('---------------------------------')
-        #print('CALCULATING PATH FROM:', current_location)
+        ##print('---------------------------------')
+        ##print('CALCULATING PATH FROM:', current_location)
         g[END_NODE[0]][END_NODE[1]] = 0
         
         search[start[0]][start[1]] = counter
         g[start[0]][start[1]] = float('inf')
         search[END_NODE[0]][END_NODE[1]] = counter
         ans, path = astar_agent_backward(current_location, counter)
-        print(path)
-        print('Path found:', ans)
         #print(path)
-        #print('----------------------------------')
+        #print('Path found:', ans)
+        #print(path)
+        ##print('----------------------------------')
         #follow path until node in path is blocked
         #Assume that the first node in path would be start point and last would be end point
         i = 1
@@ -388,11 +383,11 @@ def repeated_astar_backward(start):
             while agent_grid[next_step[0]][next_step[1]]!=BLACK:
                 steps_taken_without_path_update+=1
                 i+=1
-                print('Currently at:', current_location)
+                #print('Currently at:', current_location)
                 agent_grid[current_location[0]][current_location[1]] = WHITE
-                display_grid[current_location[0]][current_location[1]] = WHITE
+                #display_grid[current_location[0]][current_location[1]] = WHITE
                 current_location = next_step #Move a step
-                display_grid[current_location[0]][current_location[1]] = RED
+                #display_grid[current_location[0]][current_location[1]] = RED
                 #time.sleep(0.2)
                 Open_path.append(current_location)
                 agent_grid[current_location[0]][current_location[1]] = RED
@@ -403,7 +398,7 @@ def repeated_astar_backward(start):
                 for node in updates:
                     if agent_grid[node[0]][node[1]]!=PATH:
                         agent_grid[node[0]][node[1]] = actual_grid[node[0]][node[1]]
-                update_frame()
+                #update_frame()
                 next_step = path[i] #Get ready to take next step
                 #update knowledge
         
@@ -508,8 +503,8 @@ def ASTAR_PHASE(active):
                     astar_phase = False
                     break
         if count<1:
-            ans = repeated_astar_backward(START_NODE)
-            #ans = repeated_astar_ADAPTIVE(START_NODE)
+            #ans = repeated_astar_backward(START_NODE)
+            ans = repeated_astar_ADAPTIVE(START_NODE)
             #ans = repeated_astar(START_NODE)
             if ans:
                 print("REACHED TARGET")
@@ -519,15 +514,27 @@ def ASTAR_PHASE(active):
     return active
 
 def game_loop():
-    update_frame()
+    #update_frame()
     active = True
     active = SE_PHASE(active)
     active = BLOCK_PHASE(active)
     active = ASTAR_PHASE(active)
 
-def stat_loop():
+def stat_loop(i):
+    global actual_grid
+    global agent_grid
+    global search
+    global g
+    global f
+    global successful, unsuccessful
+    set_start(START_NODE[0], START_NODE[1])
+    set_end(END_NODE[0], END_NODE[1])
+    init_agent_grid()
+
+    h = [[0 for j in range(ROWS)] for i in range(ROWS)]
     calculate_hcost(ROWS, END_NODE)
-    actual_grid = newmaze()
+    fname = 'attach2\Random_Maze '+str(i)
+    actual_grid = readFile(fname)
     agent_grid = [[GREY for _ in range(ROWS)] for x in range(ROWS)]
     agent_grid[-1][-1] = BLUE
     search = [[0 for _ in range(ROWS)] for x in range(ROWS)]
@@ -538,11 +545,17 @@ def stat_loop():
     #ans = repeated_astar(START_NODE)
     if ans:
         print("REACHED TARGET")
+        successful.append(int(i))
     else:
         print("CANT REACH DUDE")
+        unsuccessful.append(int(i))
+    return ans
     pass
 
 def main():
     game_loop()
 
-main()
+for i in range(1,101):
+    stat_loop(i)
+print("Successful Files: ", len(successful))
+print("Unsuccessful Files: ", len(unsuccessful))

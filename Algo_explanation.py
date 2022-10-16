@@ -8,9 +8,9 @@ from math import inf
 import time
 from constants import *
 from Origianl_maze_gen import make_maze
-from Generator_maze import createMaze as newmaze
+from Generator_maze import newmaze
 from reader import readFile
-fname = 'attach2\Random_Maze '+str(7)
+fname = 'explanation_maze'
 actual_grid = readFile(fname)
 display_grid = actual_grid
 agent_grid = [[GREY for _ in range(ROWS)] for x in range(ROWS)]
@@ -135,7 +135,8 @@ def give_neighbors_agent(NODE):
 h = [[0 for j in range(ROWS)] for i in range(ROWS)]
 
 
-from CustomPriorityQueue_Min import CustomPQ as CQ
+from CustomPriorityQueue_minG import CustomPQ_minG as CQ
+# from CustomPriorityQueue_maxG import CustomPQ_maxG as CQ
 def astar_agent_backward(start, counter):
     target = start
     start = END_NODE
@@ -508,8 +509,8 @@ def ASTAR_PHASE(active):
                     astar_phase = False
                     break
         if count<1:
-            ans = repeated_astar_backward(START_NODE)
-            #ans = repeated_astar_ADAPTIVE(START_NODE)
+            #ans = repeated_astar_backward(START_NODE)
+            ans = repeated_astar_ADAPTIVE(START_NODE)
             #ans = repeated_astar(START_NODE)
             if ans:
                 print("REACHED TARGET")
